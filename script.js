@@ -16,7 +16,7 @@ socket.addEventListener('message', function (event) {
 
 // set up speech recog
 const recognition = new SpeechRecognition();
-recognition.continuous = true;
+recognition.continuous = false;
 recognition.lang = 'en-GB';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
