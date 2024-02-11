@@ -2,17 +2,11 @@ var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
 var SpeechGrammarList = SpeechGrammarList || window.webkitSpeechGrammarList
 var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
 
-// set up web socket
 const socket = new WebSocket('ws://localhost:55555');
 
 socket.addEventListener('open', function (event) {
-    console.log("Connection to server open!");
+    initService();
 });
-
-socket.addEventListener('message', function (event) {
-    console.log("Message from server ", event.data);
-});
-
 
 // set up speech recog
 const recognition = new SpeechRecognition();
@@ -25,16 +19,12 @@ recognition.onresult = (event) => {
     // latest result
     var result = event.results[event.results.length - 1][0];
     var inputText = result.transcript;
-    console.log("Result received: " + inputText);
-    console.log("Confidence: " + result.confidence);
+    var confidence = result.confidence;
 
-    socket.send(inputText);
-
-    console.log("Sent to socket: " + inputText);
-}
-
-recognition.onspeechend = function() {
-    //recognition.stop();
+    // only call if we have something
+    if (inputText.length > 0) {
+        rpcRun("onSpeechInput", inputText, confidence);
+    }
 }
 
 recognition.onend = (event) => {
@@ -42,8 +32,12 @@ recognition.onend = (event) => {
 }
 
 recognition.onerror = function(event) {
-    console.log("Error occurred in recognition: " + event.error);
+    // not much use recording event.error, so just restart
     recognition.start();
 }
 
 recognition.start();
+
+function initService() {
+    rpcRun("initService");
+}
